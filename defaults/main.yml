@@ -1,0 +1,5 @@
+---
+# defaults file for japeoh.awscli
+
+awscli_base_dir: ~/tools
+awscli_install_dir: ~/bin

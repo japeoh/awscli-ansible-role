@@ -1,0 +1,64 @@
+---
+# tasks file for japeoh.awscli
+
+- name: Create directorys
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - "{{ awscli_base_dir }}"
+  - "{{ awscli_install_dir }}"
+  - "{{ awscli_download_dir }}"
+
+- name: Install prerequisites
+  yum:
+    name:
+      - unzip
+    state: present
+  become: yes
+
+- name: Download awscli
+  get_url:
+    url: "{{ awscli_download_url }}"
+    dest: "{{ awscli_download_dir }}"
+
+- name: Download awscli signature
+  get_url:
+    url: "{{ awscli_signature_url }}"
+    dest: "{{ awscli_download_dir }}"
+
+- name: Create aws gpg public key
+  copy:
+    src: "{{ awscli_aws_public_key_src }}"
+    dest: "{{ awscli_aws_public_key_dest }}"
+
+- name: Import aws gpg public key
+  command: "{{ awscli_import_key_command }}"
+  changed_when: false
+
+- name: Verify the download
+  command: "{{ awscli_verify_command }}"
+  args:
+    chdir: "{{ awscli_download_dir }}"
+  changed_when: false
+
+- name: Unzip awscli
+  unarchive:
+    src: "{{ awscli_downloaded_archive }}"
+    dest: "{{ awscli_download_dir }}"
+    creates: "{{ awscli_distribution }}"
+
+- name: Install awscli
+  command: "{{ awscli_install_command }}"
+  register: result
+  changed_when: "'Skipping install' not in result.stdout"
+
+- name: Execute aws version
+  command: "{{ awscli_version_command }}"
+  changed_when: false
+
+- name: Enable autocomplete
+  lineinfile:
+    path: ~/.bashrc
+    line: "{{ awscli_autocomplete_command}}"
+    insertbefore: '#THIS MUST BE AT THE END OF THE FILE'

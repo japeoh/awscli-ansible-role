@@ -1,0 +1,19 @@
+---
+# vars file for japeoh.awscli
+
+awscli_archive: awscli-exe-linux-x86_64.zip
+
+awscli_download_dir: "{{ awscli_base_dir}}/awscli"
+awscli_download_url: "https://awscli.amazonaws.com/{{ awscli_archive }}"
+awscli_signature_url: "{{ awscli_download_url }}.sig"
+awscli_downloaded_archive: "{{ awscli_download_dir }}/{{ awscli_archive }}"
+
+awscli_distribution: "{{ awscli_download_dir }}/aws"
+
+awscli_aws_public_key_src: "{{ role_path }}/files/aws_public_key"
+awscli_aws_public_key_dest: /tmp/aws_public_key
+awscli_import_key_command: "gpg --import {{ awscli_aws_public_key_dest }}"
+awscli_verify_command: "gpg --verify {{ awscli_archive }}.sig {{ awscli_archive }}"
+awscli_install_command: "{{ awscli_distribution }}/install -i {{ awscli_download_dir }} -b {{ awscli_install_dir }} --update"
+awscli_version_command: "{{ awscli_install_dir }}/aws --version"
+awscli_autocomplete_command: "complete -C '{{ awscli_install_dir }}/aws_completer' aws"
